@@ -9,7 +9,15 @@ import re
 import datetime
 import time
 
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Input, Conv2D, MaxPooling2D, Concatenate
+from tensorflow.keras.layers import (
+    Dense,
+    Dropout,
+    Flatten,
+    Input,
+    Conv2D,
+    MaxPooling2D,
+    Concatenate,
+)
 from tensorflow.keras.utils import to_categorical, plot_model
 from tensorflow.keras.backend import clear_session
 from tensorflow.keras import Model
@@ -20,20 +28,56 @@ from tensorflow.keras.callbacks import EarlyStopping
 parser = argparse.ArgumentParser()
 
 # positional arguments (required)
-parser.add_argument('path_root', type=str, help="path to 'datasets' directory")
-parser.add_argument('dataset', type=str, help='name of the dataset. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder')
-parser.add_argument('p', type=str, help='p parameter of node2vec. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder')
-parser.add_argument('q', type=str, help='q parameter of node2vec. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder')
-parser.add_argument('definition', type=int, help='definition. E.g., 14 for 14:1. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder')
-parser.add_argument('n_channels', type=int, help='number of channels. Must not exceed half the depth of the tensors in tensors/*dataset*/node2vec_hist/ folder')
+parser.add_argument("path_root", type=str, help="path to 'datasets' directory")
+parser.add_argument(
+    "dataset",
+    type=str,
+    help="name of the dataset. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder",
+)
+parser.add_argument(
+    "p",
+    type=str,
+    help="p parameter of node2vec. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder",
+)
+parser.add_argument(
+    "q",
+    type=str,
+    help="q parameter of node2vec. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder",
+)
+parser.add_argument(
+    "definition",
+    type=int,
+    help="definition. E.g., 14 for 14:1. Must correspond to a valid value that matches names of files in tensors/*dataset*/node2vec_hist/ folder",
+)
+parser.add_argument(
+    "n_channels",
+    type=int,
+    help="number of channels. Must not exceed half the depth of the tensors in tensors/*dataset*/node2vec_hist/ folder",
+)
 
 # optional arguments
-parser.add_argument('--n_folds', type=int, default=10, choices=[2, 3, 4, 5, 6, 7, 8, 9, 10], help='number of folds for cross-validation')
-parser.add_argument('--n_repeats', type=int, default=3, choices=[1, 2, 3, 4, 5], help='number of times each fold should be repeated')
-parser.add_argument('--batch_size', type=int, default=32, choices=[32, 64, 128], help='batch size')
-parser.add_argument('--epochs', type=int, default=50, help='maximum number of epochs')
-parser.add_argument('--patience', type=int, default=5, help='patience for early stopping strategy')
-parser.add_argument('--drop_rate', type=float, default=0.3, help='dropout rate')
+parser.add_argument(
+    "--n_folds",
+    type=int,
+    default=10,
+    choices=[2, 3, 4, 5, 6, 7, 8, 9, 10],
+    help="number of folds for cross-validation",
+)
+parser.add_argument(
+    "--n_repeats",
+    type=int,
+    default=3,
+    choices=[1, 2, 3, 4, 5],
+    help="number of times each fold should be repeated",
+)
+parser.add_argument(
+    "--batch_size", type=int, default=32, choices=[32, 64, 128], help="batch size"
+)
+parser.add_argument("--epochs", type=int, default=50, help="maximum number of epochs")
+parser.add_argument(
+    "--patience", type=int, default=5, help="patience for early stopping strategy"
+)
+parser.add_argument("--drop_rate", type=float, default=0.3, help="dropout rate")
 
 args = parser.parse_args()
 
@@ -52,12 +96,12 @@ epochs = args.epochs
 my_patience = args.patience
 drop_rate = args.drop_rate
 
-data_format = 'channels_first'  # channels first
-my_optimizer = 'adam'
+data_format = "channels_first"  # channels first
+my_optimizer = "adam"
 
-# command line examples: python main.py /home/antoine/Desktop/graph_2D_CNN/datasets/ imdb_action_romance 1 1 14 5
-#                        python main.py /home/antoine/Desktop/graph_2D_CNN/datasets/ imdb_action_romance 1 1 14 5 --n_folds 10 --n_repeats 1 --epochs 20 --patience 3
-
+# command line examples:
+# python main.py /home/antoine/Desktop/graph_2D_CNN/datasets/ imdb_action_romance 1 1 14 5
+# python main.py /home/antoine/Desktop/graph_2D_CNN/datasets/ imdb_action_romance 1 1 14 5 --n_folds 10 --n_repeats 1 --epochs 20 --patience 3
 # =============================================================================
 
 
@@ -66,52 +110,58 @@ def atoi(text):
 
 
 def natural_keys(text):
-    return [atoi(c) for c in re.split('(\d+)', text)]
+    return [atoi(c) for c in re.split("(\d+)", text)]
+
 
 # =============================================================================
 
 
 def main():
 
-    my_date_time = '_'.join(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").split())
+    my_date_time = "_".join(
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").split()
+    )
 
-    parameters = {'path_root': path_root,
-                  'dataset': dataset,
-                  'p': p,
-                  'q': q,
-                  'definition': definition,
-                  'n_channels': n_channels,
-                  'n_folds': n_folds,
-                  'n_repeats': n_repeats,
-                  'batch_size': batch_size,
-                  'epochs': epochs,
-                  'my_patience': my_patience,
-                  'drop_rate': drop_rate,
-                  'data_format': data_format,
-                  'my_optimizer': my_optimizer
-                  }
+    parameters = {
+        "path_root": path_root,
+        "dataset": dataset,
+        "p": p,
+        "q": q,
+        "definition": definition,
+        "n_channels": n_channels,
+        "n_folds": n_folds,
+        "n_repeats": n_repeats,
+        "batch_size": batch_size,
+        "epochs": epochs,
+        "my_patience": my_patience,
+        "drop_rate": drop_rate,
+        "data_format": data_format,
+        "my_optimizer": my_optimizer,
+    }
 
-    name_save = path_root + '/results/' + dataset + '_augmentation_' + my_date_time
+    name_save = path_root + "/results/" + dataset + "_augmentation_" + my_date_time
 
-    with open(name_save + '_parameters.json', 'w') as my_file:
+    with open(name_save + "_parameters.json", "w") as my_file:
         json.dump(parameters, my_file, sort_keys=True, indent=4)
 
-    print('========== parameters defined and saved to disk ==========')
+    print("========== parameters defined and saved to disk ==========")
 
-    regexp_p = re.compile('p=' + p)
-    regexp_q = re.compile('q=' + q)
+    regexp_p = re.compile("p=" + p)
+    regexp_q = re.compile("q=" + q)
 
-    print('========== loading labels ==========')
+    print("========== loading labels ==========")
 
-    with open(path_root + 'classes/' + dataset + '/' + dataset + '_classes.txt', 'r') as f:
+    with open(
+        path_root + "classes/" + dataset + "/" + dataset + "_classes.txt", "r"
+    ) as f:
         ys = f.read().splitlines()
         ys = [int(elt) for elt in ys]
 
     num_classes = len(list(set(ys)))
 
-    print('classes:', list(set(ys)))
+    print("classes:", list(set(ys)))
 
-    print('converting to 0-based index')
+    print("converting to 0-based index")
 
     if 0 not in list(set(ys)):
         if -1 not in list(set(ys)):
@@ -119,31 +169,42 @@ def main():
         else:
             ys = [1 if y == 1 else 0 for y in ys]
 
-    print('classes:', list(set(ys)))
+    print("classes:", list(set(ys)))
 
-    print('========== loading tensors ==========')
+    print("========== loading tensors ==========")
 
-    path_read = path_root + 'tensors/' + dataset + '/node2vec_hist/'
-    file_names = [elt for elt in os.listdir(path_read) if (str(definition) + ':1' in elt and regexp_p.search(elt) and regexp_q.search(elt) and elt.count('p=') == 1 and elt.count('q=') == 1 and elt.split('_')[-1:][0][0].isdigit())]  # make sure the right files are selected
+    path_read = path_root + "tensors/" + dataset + "/node2vec_hist/"
+    file_names = [
+        elt
+        for elt in os.listdir(path_read)
+        if (
+            str(definition) + ":1" in elt
+            and regexp_p.search(elt)
+            and regexp_q.search(elt)
+            and elt.count("p=") == 1
+            and elt.count("q=") == 1
+            and elt.split("_")[-1:][0][0].isdigit()
+        )
+    ]  # make sure the right files are selected
     file_names.sort(key=natural_keys)
     print(len(file_names))
     print(file_names[:5])
     print(file_names[-5:])
 
-    print('ensuring tensor-label matching')
-    kept_idxs = [int(elt.split('_')[-1].split('.')[0]) for elt in file_names]
+    print("ensuring tensor-label matching")
+    kept_idxs = [int(elt.split("_")[-1].split(".")[0]) for elt in file_names]
     print(len(kept_idxs))
     print(kept_idxs[:5])
     print(kept_idxs[-5:])
-    print('removing', len(ys) - len(kept_idxs), 'labels')
+    print("removing", len(ys) - len(kept_idxs), "labels")
     ys = [y for idx, y in enumerate(ys) if idx in kept_idxs]
 
     print(len(file_names) == len(ys))
 
-    print('converting labels to array')
+    print("converting labels to array")
     ys = np.array(ys)
 
-    print('transforming integer labels into one-hot vectors')
+    print("transforming integer labels into one-hot vectors")
     ys = to_categorical(ys, num_classes)
 
     tensors = []
@@ -152,29 +213,31 @@ def main():
         tensors.append(tensor[:n_channels, :, :])
 
     tensors = np.array(tensors)
-    tensors = tensors.astype('float32')
+    tensors = tensors.astype("float32")
 
-    print('tensors shape:', tensors.shape)
+    print("tensors shape:", tensors.shape)
 
-    print('========== getting image dimensions ==========')
+    print("========== getting image dimensions ==========")
 
     img_rows, img_cols = int(tensors.shape[2]), int(tensors.shape[3])
     input_shape = (int(tensors.shape[1]), img_rows, img_cols)
 
-    print('input shape:', input_shape)
+    print("input shape:", input_shape)
 
-    print('========== shuffling data ==========')
+    print("========== shuffling data ==========")
 
-    shuffled_idxs = random.sample(range(tensors.shape[0]), int(tensors.shape[0]))  # sample w/o replct
+    shuffled_idxs = random.sample(
+        range(tensors.shape[0]), int(tensors.shape[0])
+    )  # sample w/o replct
     tensors = tensors[shuffled_idxs]
     ys = ys[shuffled_idxs]
 
-    print('========== conducting', n_folds, 'fold cross validation ==========')
-    print('repeating each fold:', n_repeats, 'times')
+    print("========== conducting", n_folds, "fold cross validation ==========")
+    print("repeating each fold:", n_repeats, "times")
 
     folds = np.array_split(tensors, n_folds, axis=0)
 
-    print('fold sizes:', [len(fold) for fold in folds])
+    print("fold sizes:", [len(fold) for fold in folds])
 
     folds_labels = np.array_split(ys, n_folds, axis=0)
 
@@ -185,153 +248,183 @@ def main():
 
         t = time.time()
 
-        x_train = np.concatenate([fold for j, fold in enumerate(folds) if j != i], axis=0)
+        x_train = np.concatenate(
+            [fold for j, fold in enumerate(folds) if j != i], axis=0
+        )
         x_test = [fold for j, fold in enumerate(folds) if j == i]
 
-        y_train = np.concatenate([y for j, y in enumerate(folds_labels) if j != i], axis=0)
+        y_train = np.concatenate(
+            [y for j, y in enumerate(folds_labels) if j != i], axis=0
+        )
         y_test = [y for j, y in enumerate(folds_labels) if j == i]
 
         for repeating in range(n_repeats):
 
-            print('clearing Keras session')
+            print("clearing Keras session")
             clear_session()
 
-            my_input = Input(shape=input_shape, dtype='float32')
+            my_input = Input(shape=input_shape, dtype="float32")
 
-            conv_1 = Conv2D(64,
-                            kernel_size=(3, 3),
-                            padding='valid',
-                            activation='relu',
-                            data_format=data_format
-                            )(my_input)
+            conv_1 = Conv2D(
+                64,
+                kernel_size=(3, 3),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(my_input)
 
-            pooled_conv_1 = MaxPooling2D(pool_size=(2, 2),
-                                         data_format=data_format
-                                         )(conv_1)
+            pooled_conv_1 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_1
+            )
 
             pooled_conv_1_dropped = Dropout(drop_rate)(pooled_conv_1)
 
-            conv_11 = Conv2D(96,
-                             kernel_size=(3, 3),
-                             padding='valid',
-                             activation='relu',
-                             data_format=data_format
-                             )(pooled_conv_1_dropped)
+            conv_11 = Conv2D(
+                96,
+                kernel_size=(3, 3),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(pooled_conv_1_dropped)
 
-            pooled_conv_11 = MaxPooling2D(pool_size=(2, 2),
-                                          data_format=data_format
-                                          )(conv_11)
+            pooled_conv_11 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_11
+            )
 
             pooled_conv_11_dropped = Dropout(drop_rate)(pooled_conv_11)
             pooled_conv_11_dropped_flat = Flatten()(pooled_conv_11_dropped)
 
-            conv_2 = Conv2D(64,
-                            kernel_size=(4, 4),
-                            padding='valid',
-                            activation='relu',
-                            data_format=data_format
-                            )(my_input)
+            conv_2 = Conv2D(
+                64,
+                kernel_size=(4, 4),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(my_input)
 
-            pooled_conv_2 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(conv_2)
+            pooled_conv_2 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_2
+            )
             pooled_conv_2_dropped = Dropout(drop_rate)(pooled_conv_2)
 
-            conv_22 = Conv2D(96,
-                             kernel_size=(4, 4),
-                             padding='valid',
-                             activation='relu',
-                             data_format=data_format,
-                             )(pooled_conv_2_dropped)
+            conv_22 = Conv2D(
+                96,
+                kernel_size=(4, 4),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(pooled_conv_2_dropped)
 
-            pooled_conv_22 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(conv_22)
+            pooled_conv_22 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_22
+            )
             pooled_conv_22_dropped = Dropout(drop_rate)(pooled_conv_22)
             pooled_conv_22_dropped_flat = Flatten()(pooled_conv_22_dropped)
 
-            conv_3 = Conv2D(64,
-                            kernel_size=(5, 5),
-                            padding='valid',
-                            activation='relu',
-                            data_format=data_format
-                            )(my_input)
+            conv_3 = Conv2D(
+                64,
+                kernel_size=(5, 5),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(my_input)
 
-            pooled_conv_3 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(conv_3)
+            pooled_conv_3 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_3
+            )
             pooled_conv_3_dropped = Dropout(drop_rate)(pooled_conv_3)
 
-            conv_33 = Conv2D(96,
-                             kernel_size=(5, 5),
-                             padding='valid',
-                             activation='relu',
-                             data_format=data_format
-                             )(pooled_conv_3_dropped)
+            conv_33 = Conv2D(
+                96,
+                kernel_size=(5, 5),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(pooled_conv_3_dropped)
 
-            pooled_conv_33 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(conv_33)
+            pooled_conv_33 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_33
+            )
             pooled_conv_33_dropped = Dropout(drop_rate)(pooled_conv_33)
             pooled_conv_33_dropped_flat = Flatten()(pooled_conv_33_dropped)
 
-            conv_4 = Conv2D(64,
-                            kernel_size=(6, 6),
-                            padding='valid',
-                            activation='relu',
-                            data_format=data_format
-                            )(my_input)
+            conv_4 = Conv2D(
+                64,
+                kernel_size=(6, 6),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(my_input)
 
-            pooled_conv_4 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(conv_4)
+            pooled_conv_4 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_4
+            )
             pooled_conv_4_dropped = Dropout(drop_rate)(pooled_conv_4)
 
-            conv_44 = Conv2D(96,
-                             kernel_size=(6, 6),
-                             padding='valid',
-                             activation='relu',
-                             data_format=data_format
-                             )(pooled_conv_4_dropped)
+            conv_44 = Conv2D(
+                96,
+                kernel_size=(6, 6),
+                padding="valid",
+                activation="relu",
+                data_format=data_format,
+            )(pooled_conv_4_dropped)
 
-            pooled_conv_44 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(conv_44)
+            pooled_conv_44 = MaxPooling2D(pool_size=(2, 2), data_format=data_format)(
+                conv_44
+            )
             pooled_conv_44_dropped = Dropout(drop_rate)(pooled_conv_44)
             pooled_conv_44_dropped_flat = Flatten()(pooled_conv_44_dropped)
 
-            merge = Concatenate()([pooled_conv_11_dropped_flat,
-                                   pooled_conv_22_dropped_flat,
-                                   pooled_conv_33_dropped_flat,
-                                   pooled_conv_44_dropped_flat])
+            merge = Concatenate()(
+                [
+                    pooled_conv_11_dropped_flat,
+                    pooled_conv_22_dropped_flat,
+                    pooled_conv_33_dropped_flat,
+                    pooled_conv_44_dropped_flat,
+                ]
+            )
 
             merge_dropped = Dropout(drop_rate)(merge)
 
-            dense = Dense(128,
-                          activation='relu'
-                          )(merge_dropped)
+            dense = Dense(128, activation="relu")(merge_dropped)
 
             dense_dropped = Dropout(drop_rate)(dense)
 
-            prob = Dense(num_classes,
-                         activation='softmax'
-                         )(dense_dropped)
+            prob = Dense(num_classes, activation="softmax")(dense_dropped)
 
             # instantiate model
             model = Model(my_input, prob)
 
             # configure model for training
-            model.compile(loss='categorical_crossentropy',
-                          optimizer=my_optimizer,
-                          metrics=['accuracy'])
+            model.compile(
+                loss="categorical_crossentropy",
+                optimizer=my_optimizer,
+                metrics=["accuracy"],
+            )
 
-            print('model compiled')
-            plot_model(model, to_file='model.png')
+            print("model compiled")
+            plot_model(model, to_file="model.png")
             print(model.summary())
 
-            early_stopping = EarlyStopping(monitor='val_accuracy',  # go through epochs as long as acc on validation set increases
-                                           patience=my_patience,
-                                           mode='max')
+            early_stopping = EarlyStopping(
+                monitor="val_accuracy",  # go through epochs as long as acc on validation set increases
+                patience=my_patience,
+                mode="max",
+            )
 
-            model.fit(x_train,
-                      y_train,
-                      batch_size=batch_size,
-                      epochs=epochs,
-                      validation_data=(x_test, y_test),
-                      callbacks=[early_stopping])
+            model.fit(
+                x_train,
+                y_train,
+                batch_size=batch_size,
+                epochs=epochs,
+                validation_data=(x_test, y_test),
+                callbacks=[early_stopping],
+            )
 
             # save [min loss,max acc] on test set
-            max_acc = max(model.history.history['val_accuracy'])
-            max_idx = model.history.history['val_accuracy'].index(max_acc)
-            output = [model.history.history['val_loss'][max_idx], max_acc]
+            max_acc = max(model.history.history["val_accuracy"])
+            max_idx = model.history.history["val_accuracy"].index(max_acc)
+            output = [model.history.history["val_loss"][max_idx], max_acc]
             # convert outputs from float32 to float for json serialization
             outputs.append([float(x) for x in output])
 
@@ -341,13 +434,22 @@ def main():
                 float_dict[key] = [float(x) for x in value]
             histories.append(float_dict)
 
-        print('**** fold', i + 1, 'done in ' + str(math.ceil(time.time() - t)) + ' second(s) ****')
+        print(
+            "**** fold",
+            i + 1,
+            "done in " + str(math.ceil(time.time() - t)) + " second(s) ****",
+        )
 
     # save results to disk
-    with open(name_save + '_results.json', 'w') as my_file:
-        json.dump({'outputs': outputs, 'histories': histories}, my_file, sort_keys=False, indent=4)
+    with open(name_save + "_results.json", "w") as my_file:
+        json.dump(
+            {"outputs": outputs, "histories": histories},
+            my_file,
+            sort_keys=False,
+            indent=4,
+        )
 
-    print('========== results saved to disk ==========')
+    print("========== results saved to disk ==========")
 
 
 if __name__ == "__main__":
