@@ -10,7 +10,7 @@ import datetime
 import time
 
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Input, Conv2D, MaxPooling2D, Concatenate
-from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical, plot_model
 from tensorflow.keras.backend import clear_session
 from tensorflow.keras import Model
 from tensorflow.keras.callbacks import EarlyStopping
@@ -314,6 +314,8 @@ def main():
                           metrics=['accuracy'])
 
             print('model compiled')
+            plot_model(model, to_file='model.png')
+            print(model.summary())
 
             early_stopping = EarlyStopping(monitor='val_accuracy',  # go through epochs as long as acc on validation set increases
                                            patience=my_patience,
